@@ -1,9 +1,8 @@
 import "./App.css";
-import DatabaseTable from "./components/DatabaseTable";
 import SideNav from "./components/SideNav";
 import { useState } from "react";
-import { Simulate } from "react-dom/test-utils";
 import Login from "./components/Login";
+import Dijelovi from "./components/Dijelovi";
 
 function App() {
   const [login, setLogin] = useState(localStorage.getItem("login"));
@@ -23,10 +22,7 @@ function App() {
           margin: "2.5rem",
         }}
       >
-        <DatabaseTable
-          name={"Dijelovi"}
-          labels={["sifraDijela", "nazivDijela", "kolicinaNaLageru"]}
-        />
+        <Dijelovi />
       </div>
     </div>
   );

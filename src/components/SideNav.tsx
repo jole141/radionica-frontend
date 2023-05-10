@@ -46,7 +46,7 @@ export default function SideNav({
             </ListItemButton>
           </ListItem>
         ))}
-        <ListItem disablePadding sx={{ background: "#ff7070" }}>
+        <ListItem disablePadding sx={{ background: "#ffaeae" }}>
           <ListItemButton
             onClick={() => {
               setLogin("0");
@@ -78,7 +78,7 @@ export default function SideNav({
           fontWeight: "bold",
           textAlign: "center",
           padding: "1rem",
-          background: "#c5e5ff",
+          background: "#e9f3ff",
         }}
       >
         RADIONICA
