@@ -1,20 +1,34 @@
 import "./App.css";
 import SideNav from "./components/SideNav";
 import { useState } from "react";
-import Login from "./components/Login";
 import Dijelovi from "./components/Dijelovi";
+import Projekti from "./components/Projekti";
+
+type ITab = "Dijelovi" | "Alati" | "Strojevi" | "Projekti" | undefined;
 
 function App() {
-  const [login, setLogin] = useState(localStorage.getItem("login"));
+  const [selectedTab, setSelectedTab] = useState<ITab>(undefined);
 
-  if (login !== "1") {
-    return <Login setLogin={setLogin} />;
-  }
+  const selectedTabContent = () => {
+    if (selectedTab === "Dijelovi") {
+      return <Dijelovi />;
+    }
+    if (selectedTab === "Alati") {
+      return <p>Alat</p>;
+    }
+    if (selectedTab === "Strojevi") {
+      return <p>Strojevi</p>;
+    }
+    if (selectedTab === "Projekti") {
+      return <Projekti />;
+    }
+    return <p>Odaberite tab</p>;
+  };
 
   return (
     <div style={{ display: "flex" }}>
       <div style={{ width: "20rem" }}>
-        <SideNav setLogin={setLogin} />
+        <SideNav selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
       </div>
       <div
         style={{
@@ -22,7 +36,7 @@ function App() {
           margin: "2.5rem",
         }}
       >
-        <Dijelovi />
+        {selectedTabContent()}
       </div>
     </div>
   );

@@ -5,19 +5,22 @@ import { CircularProgress } from "@mui/material";
 export type IDio = {
   sifra_dijela: string;
   naziv_dijela: string;
-  kolicina_na_lageru: number;
+  kolicina_dijelova: number;
 };
 
-const Dijelovi: FC = () => {
-  const api = "http://localhost:8080/dijelovi";
+const DijeloviProjekt: FC<{ id: string }> = ({ id }) => {
+  const api = "http://localhost:8080/projekti";
+  const apiDijelovi = "http://localhost:8080/dijelovi";
   const [tableData, setTableData] = useState<any>([]);
+  const [dijelovi, setDijelovi] = useState<any>([]);
 
   useEffect(() => {
     getData();
-  }, []);
+    getDijelovi();
+  }, [id]);
 
-  const getData = async () => {
-    fetch(api, {
+  const getDijelovi = async () => {
+    fetch(apiDijelovi, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -25,6 +28,24 @@ const Dijelovi: FC = () => {
     })
       .then((res) => res.json())
       .then((d) => {
+        setDijelovi(d);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const getData = async () => {
+    console.log(id);
+    fetch(api + "/" + id, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((d) => {
+        console.log(d);
         setTableData(d);
       })
       .catch((err) => {
@@ -33,57 +54,69 @@ const Dijelovi: FC = () => {
   };
 
   const createNewRow = async (values: IDio | any) => {
-    await fetch(api, {
+    await fetch(api + "/dio", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        nazivDio: values.naziv_dijela,
-        kolicinaNaLageru: values.kolicina_na_lageru,
+        sifraDijela: values.naziv_dijela,
+        sifraProjekta: id,
+        kolicinaDijelova: values.kolicina_dijelova,
       }),
     });
     await getData();
+    await getDijelovi();
   };
   const saveRowEdits = async (values: IDio | any) => {
-    await fetch(api + "/" + values.sifra_dijela, {
+    await fetch(api + "/dio/edit", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        nazivDio: values.naziv_dijela,
-        kolicinaNaLageru: values.kolicina_na_lageru,
+        sifraDijela: values.sifra_dijela,
+        sifraProjekta: id,
+        kolicinaDijelova: values.kolicina_dijelova as number,
       }),
     });
     await getData();
+    await getDijelovi();
   };
   const deleteRow = async (values: IDio | any) => {
-    await fetch(api + "/" + values.sifra_dijela, {
+    console.log(values);
+    await fetch(api + "/remove/dio", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        sifraDijela: values.sifra_dijela,
+        sifraProjekta: id,
+      }),
     });
     await getData();
+    await getDijelovi();
   };
 
   const columns = [
     {
       accessorKey: "sifra_dijela",
       header: "Sifra dijela",
-      enableAdd: false, //disable add
       enableEditing: false, //disable editing on this column
+      enableAdd: false, //disable editing on this column
       size: 80,
     },
     {
       accessorKey: "naziv_dijela",
       header: "Naziv dijela",
+      enableEditing: false, //disable editing on this column
+      select: true,
       size: 140,
     },
     {
-      accessorKey: "kolicina_na_lageru",
-      header: "Kolicina na lageru",
+      accessorKey: "kolicina_dijelova",
+      header: "Količina dijelova",
       size: 140,
     },
   ];
@@ -95,16 +128,17 @@ const Dijelovi: FC = () => {
       ) : (
         <Table
           addButton={"Dodaj dio"}
-          tableData={tableData!}
+          tableData={tableData!.dijelovi}
           setTableData={setTableData}
           createNewRow={createNewRow}
           saveRowEdits={saveRowEdits}
           deleteRow={deleteRow}
           columnsData={columns}
+          selectData={dijelovi}
         />
       )}
     </>
   );
 };
 
-export default Dijelovi;
+export default DijeloviProjekt;

@@ -12,7 +12,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Tooltip,
@@ -30,6 +34,7 @@ interface Props {
   saveRowEdits: (values: DataType) => void;
   deleteRow: (row: MRT_Row<DataType>) => void;
   columnsData: any[];
+  selectData?: any[];
 }
 
 const Table: FC<Props> = ({
@@ -40,6 +45,7 @@ const Table: FC<Props> = ({
   saveRowEdits,
   createNewRow,
   columnsData,
+  selectData = [],
 }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
@@ -73,7 +79,7 @@ const Table: FC<Props> = ({
   const handleDeleteRow = useCallback(
     (row: MRT_Row<DataType>) => {
       // TODO
-      deleteRow(row);
+      deleteRow(tableData[row.index]);
       // delete row from table row.index
       // update table data
     },
@@ -159,7 +165,7 @@ const Table: FC<Props> = ({
         )}
         renderTopToolbarCustomActions={() => (
           <Button
-            color="secondary"
+            color="primary"
             onClick={() => setCreateModalOpen(true)}
             variant="contained"
           >
@@ -173,6 +179,7 @@ const Table: FC<Props> = ({
         onClose={() => setCreateModalOpen(false)}
         onSubmit={handleCreateNewRow}
         addButton={addButton}
+        selectData={selectData}
       />
     </>
   );
@@ -193,6 +200,7 @@ export const CreateNewAccountModal = ({
   onClose,
   onSubmit,
   addButton,
+  selectData = [],
 }: CreateModalProps) => {
   const [values, setValues] = useState<any>(() =>
     columns.reduce((acc, column) => {
@@ -212,7 +220,10 @@ export const CreateNewAccountModal = ({
     <Dialog open={open}>
       <DialogTitle textAlign="center">{addButton}</DialogTitle>
       <DialogContent>
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form
+          style={{ margin: "2rem 1rem" }}
+          onSubmit={(e) => e.preventDefault()}
+        >
           <Stack
             sx={{
               width: "100%",
@@ -221,23 +232,47 @@ export const CreateNewAccountModal = ({
             }}
           >
             {columns
-              .filter((c) => c.enableEditing == undefined || c.enableEditing)
-              .map((column) => (
-                <TextField
-                  key={column.accessorKey}
-                  label={column.header}
-                  name={column.accessorKey}
-                  onChange={(e) =>
-                    setValues({ ...values, [e.target.name]: e.target.value })
-                  }
-                />
-              ))}
+              .filter((c) => c.enableAdd == undefined || c.enableAdd)
+              .map((column) => {
+                if (column.select) {
+                  return (
+                    <TextField
+                      key={column.accessorKey}
+                      name={column.accessorKey}
+                      label={column.header}
+                      select
+                      onChange={(e) =>
+                        setValues({
+                          ...values,
+                          [e.target.name]: e.target.value,
+                        })
+                      }
+                    >
+                      {selectData.map((item, indx) => (
+                        <MenuItem key={indx} value={item.sifra_dijela}>
+                          {item.naziv_dijela}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  );
+                }
+                return (
+                  <TextField
+                    key={column.accessorKey}
+                    label={column.header}
+                    name={column.accessorKey}
+                    onChange={(e) =>
+                      setValues({ ...values, [e.target.name]: e.target.value })
+                    }
+                  />
+                );
+              })}
           </Stack>
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button onClick={onClose}>Cancel</Button>
-        <Button color="secondary" onClick={handleSubmit} variant="contained">
+        <Button color="primary" onClick={handleSubmit} variant="contained">
           {addButton}
         </Button>
       </DialogActions>
