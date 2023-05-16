@@ -23,6 +23,7 @@ import {
 } from "@mui/material";
 import { Delete, Edit } from "@mui/icons-material";
 import { data, states } from "./makeData";
+import { validate } from "../validate";
 
 type DataType = (typeof data)[0];
 
@@ -35,6 +36,7 @@ interface Props {
   deleteRow: (row: MRT_Row<DataType>) => void;
   columnsData: any[];
   selectData?: any[];
+  type: string;
 }
 
 const Table: FC<Props> = ({
@@ -46,22 +48,30 @@ const Table: FC<Props> = ({
   createNewRow,
   columnsData,
   selectData = [],
+  type,
 }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
     [cellId: string]: string;
   }>({});
 
-  const handleCreateNewRow = (values: DataType) => {
-    // TODO
-    createNewRow(values);
-    tableData.push(values);
-    setTableData([...tableData]);
+  const handleCreateNewRow = async (values: DataType) => {
+    const errors = await validate(values, type);
+    if (Object.keys(errors).length) {
+      setValidationErrors(errors);
+      return false;
+    } else {
+      createNewRow(values);
+      tableData.push(values);
+      setTableData([...tableData]);
+      return true;
+    }
   };
 
   const handleSaveRowEdits: MaterialReactTableProps<DataType>["onEditingRowSave"] =
     async ({ exitEditingMode, row, values }) => {
-      if (!Object.keys(validationErrors).length) {
+      const errors = await validate(values, type);
+      if (!Object.keys(errors).length) {
         tableData[row.index] = values;
         // TODO
         saveRowEdits(values);
@@ -69,6 +79,8 @@ const Table: FC<Props> = ({
         // update table data
         setTableData([...tableData]);
         exitEditingMode(); //required to exit editing mode and close modal
+      } else {
+        setValidationErrors(errors);
       }
     };
 
@@ -91,30 +103,11 @@ const Table: FC<Props> = ({
     (
       cell: MRT_Cell<DataType>
     ): MRT_ColumnDef<DataType>["muiTableBodyCellEditTextFieldProps"] => {
+      // separate cell_id by "_" and remove only the first part and join the rest
+      const column = cell.id.split("_").slice(1).join("_");
       return {
-        error: !!validationErrors[cell.id],
-        helperText: validationErrors[cell.id],
-        onBlur: (event) => {
-          const isValid =
-            cell.column.id === "email"
-              ? validateEmail(event.target.value)
-              : cell.column.id === "age"
-              ? validateAge(+event.target.value)
-              : validateRequired(event.target.value);
-          if (!isValid) {
-            //set validation error for cell if invalid
-            setValidationErrors({
-              ...validationErrors,
-              [cell.id]: `${cell.column.columnDef.header} is required`,
-            });
-          } else {
-            //remove validation error for cell if valid
-            delete validationErrors[cell.id];
-            setValidationErrors({
-              ...validationErrors,
-            });
-          }
-        },
+        error: !!validationErrors[column!],
+        helperText: validationErrors[column!],
       };
     },
     [validationErrors]
@@ -180,6 +173,8 @@ const Table: FC<Props> = ({
         onSubmit={handleCreateNewRow}
         addButton={addButton}
         selectData={selectData}
+        validationErrors={validationErrors}
+        clearErrors={() => setValidationErrors({})}
       />
     </>
   );
@@ -188,7 +183,7 @@ const Table: FC<Props> = ({
 interface CreateModalProps {
   columns: MRT_ColumnDef<DataType>[];
   onClose: () => void;
-  onSubmit: (values: DataType) => void;
+  onSubmit: (values: DataType) => Promise<void>;
   open: boolean;
   addButton: string;
 }
@@ -200,6 +195,8 @@ export const CreateNewAccountModal = ({
   onClose,
   onSubmit,
   addButton,
+  validationErrors,
+  clearErrors,
   selectData = [],
 }: CreateModalProps) => {
   const [values, setValues] = useState<any>(() =>
@@ -209,11 +206,14 @@ export const CreateNewAccountModal = ({
     }, {} as any)
   );
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // TODO: validation
     //put your validation logic here
-    onSubmit(values);
-    onClose();
+    const valid = await onSubmit(values);
+    if (valid) {
+      clearErrors();
+      onClose();
+    }
   };
 
   return (
@@ -241,6 +241,8 @@ export const CreateNewAccountModal = ({
                       name={column.accessorKey}
                       label={column.header}
                       select
+                      error={validationErrors[column.accessorKey]}
+                      helperText={validationErrors[column.accessorKey]}
                       onChange={(e) =>
                         setValues({
                           ...values,
@@ -256,11 +258,14 @@ export const CreateNewAccountModal = ({
                     </TextField>
                   );
                 }
+
                 return (
                   <TextField
                     key={column.accessorKey}
                     label={column.header}
                     name={column.accessorKey}
+                    error={validationErrors[column.accessorKey]}
+                    helperText={validationErrors[column.accessorKey]}
                     onChange={(e) =>
                       setValues({ ...values, [e.target.name]: e.target.value })
                     }
@@ -271,7 +276,14 @@ export const CreateNewAccountModal = ({
         </form>
       </DialogContent>
       <DialogActions sx={{ p: "1.25rem" }}>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button
+          onClick={() => {
+            clearErrors();
+            onClose();
+          }}
+        >
+          Cancel
+        </Button>
         <Button color="primary" onClick={handleSubmit} variant="contained">
           {addButton}
         </Button>

@@ -7,7 +7,7 @@ import Projekti from "./components/Projekti";
 type ITab = "Dijelovi" | "Alati" | "Strojevi" | "Projekti" | undefined;
 
 function App() {
-  const [selectedTab, setSelectedTab] = useState<ITab>(undefined);
+  const [selectedTab, setSelectedTab] = useState<ITab>("Dijelovi");
 
   const selectedTabContent = () => {
     if (selectedTab === "Dijelovi") {

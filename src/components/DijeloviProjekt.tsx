@@ -135,6 +135,7 @@ const DijeloviProjekt: FC<{ id: string }> = ({ id }) => {
           deleteRow={deleteRow}
           columnsData={columns}
           selectData={dijelovi}
+          type={"dijeloviProjekt"}
         />
       )}
     </>

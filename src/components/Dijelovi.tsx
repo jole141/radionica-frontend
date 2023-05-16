@@ -101,6 +101,7 @@ const Dijelovi: FC = () => {
           saveRowEdits={saveRowEdits}
           deleteRow={deleteRow}
           columnsData={columns}
+          type={"dijelovi"}
         />
       )}
     </>

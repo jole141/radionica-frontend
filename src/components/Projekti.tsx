@@ -11,6 +11,7 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
+import { validate } from "../validate";
 
 const Projekti: FC = () => {
   const api = "http://localhost:8080/projekti";
@@ -256,6 +257,9 @@ export const CreateNewAccountModal = ({
   id,
 }: any) => {
   const api = "http://localhost:8080/projekti";
+  const [validationErrors, setValidationErrors] = useState<{
+    [cellId: string]: string;
+  }>({});
   const [values, setValues] = useState<any>(() =>
     columns.reduce((acc, column) => {
       if (edit) {
@@ -273,8 +277,17 @@ export const CreateNewAccountModal = ({
     }, {} as any)
   );
 
+  const clearErrors = () => {
+    setValidationErrors({});
+  };
+
   const handleSubmit = async () => {
-    // TODO: validation
+    clearErrors();
+    const errors = await validate(values, "projekti");
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
     if (edit) {
       await fetch(api + "/" + id, {
         method: "PUT",
@@ -304,6 +317,8 @@ export const CreateNewAccountModal = ({
       });
     }
     await getData();
+    const defaultValues = helper();
+    setValues(defaultValues);
     onClose();
   };
 
@@ -355,6 +370,8 @@ export const CreateNewAccountModal = ({
                         type="date"
                         key={column.accessorKey}
                         name={column.accessorKey}
+                        error={!!validationErrors[column.accessorKey]}
+                        helperText={validationErrors[column.accessorKey]}
                         value={values[column.accessorKey]}
                         onChange={(e) =>
                           setValues({
@@ -372,6 +389,8 @@ export const CreateNewAccountModal = ({
                     key={column.accessorKey}
                     label={column.header}
                     name={column.accessorKey}
+                    error={!!validationErrors[column.accessorKey]}
+                    helperText={validationErrors[column.accessorKey]}
                     onChange={(e) =>
                       setValues({ ...values, [e.target.name]: e.target.value })
                     }
@@ -385,6 +404,7 @@ export const CreateNewAccountModal = ({
       <DialogActions sx={{ p: "1.25rem" }}>
         <Button
           onClick={() => {
+            clearErrors();
             onClose();
             const defaultValues = helper();
             setValues(defaultValues);
