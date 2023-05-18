@@ -12,6 +12,7 @@ import {
   TextField,
 } from "@mui/material";
 import { validate } from "../validate";
+import ProjektPodatci from "./ProjektPodatci";
 
 const Projekti: FC = () => {
   const api = "http://localhost:8080/projekti";
@@ -104,140 +105,7 @@ const Projekti: FC = () => {
             id={tableData[index].sifra_projekta}
           />
 
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <span>
-              <Button
-                color="primary"
-                sx={{ marginRight: "0.5rem" }}
-                onClick={() => setIndex(index - 1)}
-                variant="contained"
-                disabled={index === 0}
-              >
-                Prethodni
-              </Button>
-              <Button
-                color="primary"
-                onClick={() => setIndex(index + 1)}
-                variant="contained"
-                disabled={index === tableData.length - 1}
-              >
-                Sljedeci
-              </Button>
-            </span>
-            <span>
-              <Button
-                color="primary"
-                sx={{ marginRight: "0.5rem" }}
-                onClick={() => setModalOpen(true)}
-                variant="contained"
-              >
-                Dodaj novi projekt
-              </Button>
-              <Button
-                color="primary"
-                sx={{ marginRight: "0.5rem" }}
-                onClick={() => setModalOpen2(true)}
-                variant="contained"
-              >
-                Uredi projekt
-              </Button>
-              <Button
-                color="error"
-                sx={{ marginRight: "0.5rem" }}
-                onClick={() => deleteData()}
-                variant="contained"
-              >
-                Izbrisi projekt
-              </Button>
-            </span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              paddingTop: "2rem",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Sifra projekta:</strong>
-              <p>{tableData[index].sifra_projekta}</p>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Naziv projekta:</strong>
-              <p>{tableData[index].naziv_projekta}</p>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Opis projekta:</strong>
-              <p>{tableData[index].opis_projekta}</p>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Datum početka:</strong>
-              <p>
-                {new Date(tableData[index].datum_pocetka).toLocaleDateString(
-                  "hr-HR"
-                )}
-              </p>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Datum završetka:</strong>
-              <p>
-                {new Date(tableData[index].datum_završetka).toLocaleDateString(
-                  "hr-HR"
-                )}
-              </p>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "0.5rem",
-                alignItems: "center",
-                height: "2.5rem",
-              }}
-            >
-              <strong>Dijelovi:</strong>
-            </div>
-          </div>
+          <ProjektPodatci tableData={tableData} index={index} />
           <div>
             <DijeloviProjekt id={tableData[index].sifra_projekta} />
           </div>

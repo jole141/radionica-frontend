@@ -1,5 +1,5 @@
-export const validate = async (data: any, type: string) => {
-  const errors: any = {};
+async function validate(data, type) {
+  const errors = {};
   if (type === "dijelovi") {
     if (!data.naziv_dijela.length) {
       errors.naziv_dijela = "Naziv dijela je obavezan";
@@ -26,7 +26,7 @@ export const validate = async (data: any, type: string) => {
   }
   if (type === "dijeloviProjekt") {
     const dijelovi = await getDijelovi();
-    const dio = dijelovi.find((d: any) => d.sifra_dijela === data.naziv_dijela);
+    const dio = dijelovi.find((d) => d.sifra_dijela === data.naziv_dijela);
     if (!data.naziv_dijela.length) {
       errors.naziv_dijela = "Dio je obavezan";
     }
@@ -97,7 +97,7 @@ export const validate = async (data: any, type: string) => {
     }
   }
   return errors;
-};
+}
 
 const getDijelovi = async () => {
   return fetch("http://localhost:8080/dijelovi", {
@@ -114,3 +114,5 @@ const getDijelovi = async () => {
       console.log(err);
     });
 };
+
+module.exports = { validate };
