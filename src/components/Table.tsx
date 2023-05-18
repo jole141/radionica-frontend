@@ -37,6 +37,7 @@ interface Props {
   columnsData: any[];
   selectData?: any[];
   type: string;
+  idMaster?: string;
 }
 
 const Table: FC<Props> = ({
@@ -49,6 +50,7 @@ const Table: FC<Props> = ({
   columnsData,
   selectData = [],
   type,
+  idMaster = undefined,
 }) => {
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{
@@ -70,7 +72,8 @@ const Table: FC<Props> = ({
 
   const handleSaveRowEdits: MaterialReactTableProps<DataType>["onEditingRowSave"] =
     async ({ exitEditingMode, row, values }) => {
-      const errors = await validate(values, type);
+      setValidationErrors({});
+      const errors = await validate(values, type, true, idMaster);
       if (!Object.keys(errors).length) {
         tableData[row.index] = values;
         // TODO

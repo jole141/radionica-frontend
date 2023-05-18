@@ -136,6 +136,7 @@ const DijeloviProjekt: FC<{ id: string }> = ({ id }) => {
           columnsData={columns}
           selectData={dijelovi}
           type={"dijeloviProjekt"}
+          idMaster={id}
         />
       )}
     </>

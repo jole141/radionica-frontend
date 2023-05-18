@@ -104,7 +104,53 @@ const Projekti: FC = () => {
             data={tableData[index]}
             id={tableData[index].sifra_projekta}
           />
-
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <span>
+              <Button
+                color="primary"
+                sx={{ marginRight: "0.5rem" }}
+                onClick={() => setIndex(index - 1)}
+                variant="contained"
+                disabled={index === 0}
+              >
+                Prethodni
+              </Button>
+              <Button
+                color="primary"
+                onClick={() => setIndex(index + 1)}
+                variant="contained"
+                disabled={index === tableData.length - 1}
+              >
+                Sljedeći
+              </Button>
+            </span>
+            <span>
+              <Button
+                color="primary"
+                sx={{ marginRight: "0.5rem" }}
+                onClick={() => setModalOpen(true)}
+                variant="contained"
+              >
+                Dodaj novi projekt
+              </Button>
+              <Button
+                color="primary"
+                sx={{ marginRight: "0.5rem" }}
+                onClick={() => setModalOpen2(true)}
+                variant="contained"
+              >
+                Uredi projekt
+              </Button>
+              <Button
+                color="error"
+                sx={{ marginRight: "0.5rem" }}
+                onClick={() => deleteData()}
+                variant="contained"
+              >
+                Izbrisi projekt
+              </Button>
+            </span>
+          </div>
           <ProjektPodatci tableData={tableData} index={index} />
           <div>
             <DijeloviProjekt id={tableData[index].sifra_projekta} />

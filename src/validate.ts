@@ -1,4 +1,9 @@
-export const validate = async (data: any, type: string) => {
+export const validate = async (
+  data: any,
+  type: string,
+  edit?: boolean,
+  idMaster?: string
+) => {
   const errors: any = {};
   if (type === "dijelovi") {
     if (!data.naziv_dijela.length) {
@@ -26,7 +31,25 @@ export const validate = async (data: any, type: string) => {
   }
   if (type === "dijeloviProjekt") {
     const dijelovi = await getDijelovi();
-    const dio = dijelovi.find((d: any) => d.sifra_dijela === data.naziv_dijela);
+    let dio = dijelovi.find(
+      (d: any) =>
+        d.sifra_dijela === data.naziv_dijela ||
+        d.sifra_dijela === data.sifra_dijela
+    );
+    let kolicina_na_lageru = dio.kolicina_na_lageru;
+    if (edit && idMaster !== undefined) {
+      dio = dijelovi.find((d: any) => d.sifra_dijela === data.sifra_dijela);
+      const dijeloviProjekta = await getDijeloviProjekt(idMaster);
+      console.log(dijeloviProjekta);
+      const dioNaProjektu = dijeloviProjekta.dijelovi.find(
+        (d: any) => d.sifra_dijela === data.sifra_dijela
+      );
+      kolicina_na_lageru =
+        Number(dioNaProjektu.kolicina_dijelova) +
+        Number(dio.kolicina_na_lageru);
+    }
+
+    console.log(dio, data.naziv_dijela);
     if (!data.naziv_dijela.length) {
       errors.naziv_dijela = "Dio je obavezan";
     }
@@ -45,11 +68,11 @@ export const validate = async (data: any, type: string) => {
     if (
       data.naziv_dijela.length &&
       /^[0-9]+$/.test(data.kolicina_dijelova) &&
-      dio.kolicina_na_lageru < data.kolicina_dijelova
+      kolicina_na_lageru < data.kolicina_dijelova
     ) {
       errors.kolicina_dijelova =
         "Nedovoljna količina dijelova na lageru (dostupno: " +
-        dio.kolicina_na_lageru +
+        kolicina_na_lageru +
         ")";
     }
     if (data.kolicina_dijelova.length && data.kolicina_dijelova > 100000) {
@@ -101,6 +124,22 @@ export const validate = async (data: any, type: string) => {
 
 const getDijelovi = async () => {
   return fetch("http://localhost:8080/dijelovi", {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((res) => res.json())
+    .then((d) => {
+      return d;
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+const getDijeloviProjekt = async (id: string) => {
+  return fetch("http://localhost:8080/projekti/" + id, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

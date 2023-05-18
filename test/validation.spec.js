@@ -7,6 +7,7 @@ describe("Validacija", () => {
       "dijelovi"
     );
     expect(test.naziv_dijela).toBe(undefined);
+    expect(test.kolicina_na_lageru).toBe(undefined);
   });
 
   it("Naziv dijela je obavezan", async () => {
@@ -15,6 +16,7 @@ describe("Validacija", () => {
       "dijelovi"
     );
     expect(test.naziv_dijela).toBe("Naziv dijela je obavezan");
+    expect(test.kolicina_na_lageru).toBe(undefined);
   });
 
   it("Naziv dijela mora biti string", async () => {
