@@ -31,25 +31,6 @@ export const validate = async (
   }
   if (type === "dijeloviProjekt") {
     const dijelovi = await getDijelovi();
-    let dio = dijelovi.find(
-      (d: any) =>
-        d.sifra_dijela === data.naziv_dijela ||
-        d.sifra_dijela === data.sifra_dijela
-    );
-    let kolicina_na_lageru = dio.kolicina_na_lageru;
-    if (edit && idMaster !== undefined) {
-      dio = dijelovi.find((d: any) => d.sifra_dijela === data.sifra_dijela);
-      const dijeloviProjekta = await getDijeloviProjekt(idMaster);
-      console.log(dijeloviProjekta);
-      const dioNaProjektu = dijeloviProjekta.dijelovi.find(
-        (d: any) => d.sifra_dijela === data.sifra_dijela
-      );
-      kolicina_na_lageru =
-        Number(dioNaProjektu.kolicina_dijelova) +
-        Number(dio.kolicina_na_lageru);
-    }
-
-    console.log(dio, data.naziv_dijela);
     if (!data.naziv_dijela.length) {
       errors.naziv_dijela = "Dio je obavezan";
     }
@@ -65,15 +46,35 @@ export const validate = async (
     if (data.kolicina_dijelova.length && data.kolicina_dijelova < 0) {
       errors.kolicina_dijelova = "Količina dijelova mora biti pozitivan broj";
     }
-    if (
-      data.naziv_dijela.length &&
-      /^[0-9]+$/.test(data.kolicina_dijelova) &&
-      kolicina_na_lageru < data.kolicina_dijelova
-    ) {
-      errors.kolicina_dijelova =
-        "Nedovoljna količina dijelova na lageru (dostupno: " +
-        kolicina_na_lageru +
-        ")";
+    if (data.naziv_dijela.length > 0) {
+      let dio = dijelovi.find(
+        (d: any) =>
+          d.sifra_dijela === data.naziv_dijela ||
+          d.sifra_dijela === data.sifra_dijela
+      );
+      console.log(dijelovi, data);
+      let kolicina_na_lageru = dio.kolicina_na_lageru;
+      if (edit && idMaster !== undefined) {
+        dio = dijelovi.find((d: any) => d.sifra_dijela === data.sifra_dijela);
+        const dijeloviProjekta = await getDijeloviProjekt(idMaster);
+        console.log(dijeloviProjekta);
+        const dioNaProjektu = dijeloviProjekta.dijelovi.find(
+          (d: any) => d.sifra_dijela === data.sifra_dijela
+        );
+        kolicina_na_lageru =
+          Number(dioNaProjektu.kolicina_dijelova) +
+          Number(dio.kolicina_na_lageru);
+      }
+
+      if (
+        /^[0-9]+$/.test(data.kolicina_dijelova) &&
+        kolicina_na_lageru < data.kolicina_dijelova
+      ) {
+        errors.kolicina_dijelova =
+          "Nedovoljna količina dijelova na lageru (dostupno: " +
+          kolicina_na_lageru +
+          ")";
+      }
     }
     if (data.kolicina_dijelova.length && data.kolicina_dijelova > 100000) {
       errors.kolicina_dijelova = "Količina dijelova mora biti manja od 100000";
